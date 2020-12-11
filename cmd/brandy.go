@@ -31,7 +31,7 @@ func extractPackage(pkg, dir string) error {
 		return err
 	}
 	for {
-		hdr, err := pr.Next()
+		hdr,f, err := pr.Next()
 		if err != nil {
 			if err == io.EOF {
 				return nil
@@ -39,6 +39,12 @@ func extractPackage(pkg, dir string) error {
 			return err
 		}
 		fmt.Printf("fileName: %s\n", hdr.Name)
+		fheader := make([]byte, 8);
+		if _, err := f.Read(fheader); err != nil {
+			fmt.Printf("unable to read file: %s\n", err.Error())
+			continue
+		}
+		fmt.Printf("first 8 bytes are: %s\n", fheader)
 	}
 
 	return nil
