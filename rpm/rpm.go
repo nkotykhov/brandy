@@ -2,6 +2,7 @@ package rpm
 
 import (
 	"bytes"
+	"bufio"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -29,7 +30,6 @@ const (
 	TagVersion
 	TagRelease
 	TagEpoch
-	TagSerial
 	TagSummary
 	TagDescription
 	TagBuildTime
@@ -55,7 +55,7 @@ const (
 	TagPostun
 	TagOldFilenames
 	TagFileSizes
-	TagFileStats
+	TagFileStates
 	TagFileModes
 	TagFileUIDs
 	TagFileGIDs
@@ -83,17 +83,23 @@ const (
 	TagConflictName
 	TagConflictVersion
 	TagDefaultPrefix
-	TagBuildRoot
+	TagBuildroot
 	TagInstallPrefix
 	TagExclusiveArch
 	TagExclusiveOS
+	TagEnclusiveArch
+	TagEnclusiveOS
 	TagAutoReqProv
+	TagRPMVersion
 	TagTriggerScripts
 	TagTriggerName
 	TagTriggerVersion
 	TagTriggerFlags
 	TagTriggerIndex
-	TagVerifyScript
+)
+
+const(
+	TagVerifyScript HeaderTag = 1079+iota
 	TagChangelogTime
 	TagChangelogName
 	TagChangelogText
@@ -165,6 +171,11 @@ const (
 	TagFsContexts
 	TagReContexts
 	TagPolicies
+
+)
+
+const (
+	TagFilenames  = 5000
 )
 
 type HeaderDataType int32
@@ -237,6 +248,15 @@ func ReadHeader(r io.Reader) (*Header, error) {
 	return header, nil
 }
 
+func (h Header) AvailableTags() ([]HeaderTag){
+	tags := make([]HeaderTag, len(h.indexes))
+	for i,idx := range h.indexes {
+		tags[i] = idx.Tag
+	}
+
+	return tags
+
+}
 func (h Header) GetTag(t HeaderTag) (HeaderDataType, []byte, error) {
 	for _, idx := range h.indexes {
 		if idx.Tag == t {
@@ -246,6 +266,55 @@ func (h Header) GetTag(t HeaderTag) (HeaderDataType, []byte, error) {
 	}
 
 	return DataTypeNotFound, nil, fmt.Errorf("error tag not found")
+}
+
+
+func (h Header) getTag(t HeaderTag) (*HeaderIndexEntry, []byte, error) {
+	for _, idx := range h.indexes {
+		if idx.Tag == t {
+			d, err := readData(&idx, h.data)
+			return &idx, d, err
+		}
+	}
+
+	return nil, nil, fmt.Errorf("error tag not found")
+}
+
+func (h Header) GetString(t HeaderTag) (string, error) {
+	idx, v, err := h.getTag(t)
+	if err != nil {
+		return "", err
+	}
+	if idx.DataType != DataTypeString {
+		return "", fmt.Errorf("error invalid data type %d, %d", idx.DataType, DataTypeStringArray)
+	}
+	br := bufio.NewReader(bytes.NewReader(v))
+	cstr, err := br.ReadBytes(0)
+	if err != nil {
+		return "", err
+	}
+	s := string(cstr[0:len(cstr)-1])
+	return s, nil
+}
+
+func (h Header) GetStrings(t HeaderTag) ([]string, error) {
+	idx, v, err := h.getTag(t)
+	if err != nil {
+		return nil, err
+	}
+	if idx.DataType != DataTypeStringArray {
+		return nil, fmt.Errorf("error invalid data type %d, %d", idx.DataType, DataTypeStringArray)
+	}
+	s := make([]string, idx.Count)
+	br := bufio.NewReader(bytes.NewReader(v))
+	for i := 0; i < int(idx.Count); i++ {
+		cstr, err := br.ReadBytes(0)
+		if err != nil {
+			return nil, err
+		}
+		s[i] = string(cstr[0:len(cstr)-1])
+	}
+	return s, nil
 }
 
 func readData(idx *HeaderIndexEntry, d []byte) ([]byte, error) {
