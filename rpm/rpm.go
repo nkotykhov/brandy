@@ -180,7 +180,7 @@ const (
 	DataTypeBin                        = 7
 	DataTypeStringArray                = 8
 
-	DataTypeBad = -1
+	DataTypeNotFound = -1
 )
 
 const HeaderIndexEntrySize = 16
@@ -245,7 +245,7 @@ func (h Header) GetTag(t HeaderTag) (HeaderDataType, []byte, error) {
 		}
 	}
 
-	return DataTypeBad, nil, fmt.Errorf("error tag not found")
+	return DataTypeNotFound, nil, fmt.Errorf("error tag not found")
 }
 
 func readData(idx *HeaderIndexEntry, d []byte) ([]byte, error) {

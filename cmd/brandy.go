@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"github.com/rocky-linux/brandy/rpm"
 	"github.com/rocky-linux/brandy/rpm/rpmutil"
 	"os"
 )
 
-// extractPackage extracts contents of RPM to dir
-// using rpm2cpio and cpio utils
 func extractPackage(pkg, dir string) error {
 	f, err := os.Open(pkg)
 	if err != nil {
@@ -26,6 +25,22 @@ func extractPackage(pkg, dir string) error {
 	}
 	_, version, err := p.Header.GetTag(rpm.TagVersion)
 	fmt.Printf("%s-%s\n", name, version)
+	pr, err := p.Payload();
+
+	if err != nil {
+		return err
+	}
+	for {
+		hdr, err := pr.Next()
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+			return err
+		}
+		fmt.Printf("fileName: %s\n", hdr.Name)
+	}
+
 	return nil
 
 }

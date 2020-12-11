@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"github.com/rocky-linux/brandy/rpm"
+	"github.com/rocky-linux/brandy/cpio"
 )
 
 type Package struct {
@@ -16,8 +17,7 @@ type Package struct {
 
 
 func ReadPackage(r io.Reader) (*Package, error) {
-	rc := newReadCounter(r)
-	
+	rc := &readCounter{r: r}
 	// first lets get rid of Lead, for sanity check
 	// will still use first LeadMagic to make sure
 	// file is considered to be RPM, but rpm itself
@@ -60,7 +60,13 @@ func ReadPackage(r io.Reader) (*Package, error) {
 	return pkg, nil
 }
 
-
+func (pkg *Package) Payload() (cpio.Reader, error) {
+	plRdr, err := decompressPkgPayload(pkg)
+	if err != nil {
+		return nil, err
+	}
+	return cpio.NewReader(plRdr)
+}
 
 
 type readCounter struct {
@@ -68,11 +74,6 @@ type readCounter struct {
 	r io.Reader
 }
 
-func newReadCounter(r io.Reader) *readCounter {
-	return &readCounter{
-		r: r,
-	}
-}
 
 func (rc *readCounter) Read(b []byte) (n int,err error) {
 	n, err = rc.r.Read(b)
