@@ -1,8 +1,8 @@
 package rpm
 
 import (
-	"bytes"
 	"bufio"
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -98,8 +98,8 @@ const (
 	TagTriggerIndex
 )
 
-const(
-	TagVerifyScript HeaderTag = 1079+iota
+const (
+	TagVerifyScript HeaderTag = 1079 + iota
 	TagChangelogTime
 	TagChangelogName
 	TagChangelogText
@@ -171,11 +171,10 @@ const(
 	TagFsContexts
 	TagReContexts
 	TagPolicies
-
 )
 
 const (
-	TagFilenames  = 5000
+	TagFilenames = 5000
 )
 
 type HeaderDataType int32
@@ -248,9 +247,9 @@ func ReadHeader(r io.Reader) (*Header, error) {
 	return header, nil
 }
 
-func (h Header) AvailableTags() ([]HeaderTag){
+func (h Header) AvailableTags() []HeaderTag {
 	tags := make([]HeaderTag, len(h.indexes))
-	for i,idx := range h.indexes {
+	for i, idx := range h.indexes {
 		tags[i] = idx.Tag
 	}
 
@@ -267,7 +266,6 @@ func (h Header) GetTag(t HeaderTag) (HeaderDataType, []byte, error) {
 
 	return DataTypeNotFound, nil, fmt.Errorf("error tag not found")
 }
-
 
 func (h Header) getTag(t HeaderTag) (*HeaderIndexEntry, []byte, error) {
 	for _, idx := range h.indexes {
@@ -293,7 +291,7 @@ func (h Header) GetString(t HeaderTag) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	s := string(cstr[0:len(cstr)-1])
+	s := string(cstr[0 : len(cstr)-1])
 	return s, nil
 }
 
@@ -312,7 +310,7 @@ func (h Header) GetStrings(t HeaderTag) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		s[i] = string(cstr[0:len(cstr)-1])
+		s[i] = string(cstr[0 : len(cstr)-1])
 	}
 	return s, nil
 }

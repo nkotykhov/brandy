@@ -1,13 +1,14 @@
 package xz
+
 import (
-	"os/exec"
 	"io"
+	"os/exec"
 )
 
 func NewReader(r io.Reader) io.ReadCloser {
 	rpipe, wpipe := io.Pipe()
 
-	cmd := exec.Command("xz", "--decompress","--stdout")
+	cmd := exec.Command("xz", "--decompress", "--stdout")
 	cmd.Stdin = r
 	cmd.Stdout = wpipe
 

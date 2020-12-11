@@ -2,23 +2,23 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"github.com/rocky-linux/brandy/rpm"
 	"github.com/rocky-linux/brandy/rpm/rpmutil"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
 )
 
-func srpm2git(pkg *rpmutil.Package, basedir string) error{
+func srpm2git(pkg *rpmutil.Package, basedir string) error {
 	specDir := path.Join(basedir, "SPECS")
 	if _, err := os.Stat(specDir); os.IsNotExist(err) {
-		err := os.Mkdir(specDir, 0760);
+		err := os.Mkdir(specDir, 0760)
 		if err != nil {
 			return err
 		}
 	}
-	payload, err := pkg.Payload();
+	payload, err := pkg.Payload()
 	if err != nil {
 		return err
 	}
@@ -28,7 +28,7 @@ func srpm2git(pkg *rpmutil.Package, basedir string) error{
 			return err
 		}
 		if filepath.Ext(h.Name) == ".spec" {
-			err := func () error {
+			err := func() error {
 				dest := path.Join(specDir, h.Name)
 				out, err := os.Create(dest)
 				if err != nil {
@@ -51,10 +51,9 @@ func srpm2git(pkg *rpmutil.Package, basedir string) error{
 	return nil
 }
 
-
 func main() {
 	if len(os.Args) < 3 {
-		fmt.Fprintf(os.Stderr, "usage %s [file] [path]\n", os.Args[0]);
+		fmt.Fprintf(os.Stderr, "usage %s [file] [path]\n", os.Args[0])
 		os.Exit(1)
 	}
 
