@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func extractPackage(pkg, dir string) error {
+func playground(pkg, dir string) error {
 	f, err := os.Open(pkg)
 	if err != nil {
 		return err
@@ -52,7 +52,12 @@ func extractPackage(pkg, dir string) error {
 }
 
 func main() {
-	err := extractPackage(os.Args[1], "")
+	if len(os.Args) < 2 {
+		fmt.Fprintf(os.Stderr, "usage %s [file]\n", os.Args[0]);
+		os.Exit(1)
+	}
+
+	err := playground(os.Args[1], "")
 	if err != nil {
 		panic(err)
 	}
