@@ -17,15 +17,10 @@ const (
 )
 
 func decompressPkgPayload(p *Package) (io.Reader, error) {
-	var compressor string
-	t, val, err := p.Header.GetTag(rpm.TagPayloadCompressor)
+	compressor, err := p.Header.GetString(rpm.TagPayloadCompressor)
 
-	if err != nil && t != rpm.DataTypeNotFound {
+	if err != nil {
 		return nil, err
-	}
-	compressor = plGzip
-	if t != rpm.DataTypeNotFound {
-		compressor = string(val)
 	}
 
 	switch compressor {

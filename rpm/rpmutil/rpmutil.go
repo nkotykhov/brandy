@@ -15,7 +15,6 @@ type Package struct {
 	r *readCounter
 }
 
-
 func ReadPackage(r io.Reader) (*Package, error) {
 	rc := &readCounter{r: r}
 	// first lets get rid of Lead, for sanity check
@@ -66,6 +65,21 @@ func (pkg *Package) Payload() (cpio.Reader, error) {
 		return nil, err
 	}
 	return cpio.NewReader(plRdr)
+}
+
+
+func (pkg *Package) Files() ([]FileInfo, error) {
+
+	paths, err := pkg.Header.GetStrings(rpm.TagDirNames)
+	if err != nil {
+		return nil, err
+	}
+
+	files := make([]FileInfo, len(paths))
+	for i:=0;i<len(files);i++ {
+		files[i].Name = paths[i]
+	}
+	return files, nil
 }
 
 
