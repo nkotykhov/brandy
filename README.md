@@ -1,7 +1,7 @@
 
 ## Brandy
 
-Nikolay Kotykhov (@https://github.com/nkotykhov) stated :
+Nikolay Kotykhov (@nkotykhov) stated :
 Goal is to use it in smallest env for building up distro, aka you don't need worry about getting all deps before you can work with rpm
 
 How it works ?
